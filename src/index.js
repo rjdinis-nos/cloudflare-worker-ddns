@@ -171,6 +171,12 @@ class Cloudflare {
         }
       );
       var body = await response.json();
+      if (!body.success) {
+        throw new BadRequestException(`Cloudflare API error: ${body.errors?.[0]?.message || 'Unknown error'}`);
+      }
+      if (!body.result || body.result.length === 0) {
+        throw new BadRequestException(`Zone '${name}' not found`);
+      }
       return body.result[0];
     };
 
@@ -185,6 +191,12 @@ class Cloudflare {
         }
       );
       var body = await response.json();
+      if (!body.success) {
+        throw new BadRequestException(`Cloudflare API error: ${body.errors?.[0]?.message || 'Unknown error'}`);
+      }
+      if (!body.result || body.result.length === 0) {
+        throw new BadRequestException(`DNS record '${name}' not found in zone '${zone.name}'`);
+      }
       return body.result[0];
     };
 
@@ -202,7 +214,10 @@ class Cloudflare {
         }
       );
       var body = await response.json();
-      return body.result[0];
+      if (!body.success) {
+        throw new BadRequestException(`Failed to update DNS record: ${body.errors?.[0]?.message || 'Unknown error'}`);
+      }
+      return body.result;
     };
   }
 }

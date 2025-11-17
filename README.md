@@ -47,7 +47,7 @@ This worker provides a compatible endpoint for DDNS clients (such as routers or 
 **Example Request:**
 ```bash
 curl -u "example.com:your-api-token" \
-  "https://your-worker.workers.dev/update?hostname=home.example.com&myip=1.2.3.4"
+  "https://cloudflare-worker-ddns.basalto.workers.dev/update?hostname=home.example.com&myip=1.2.3.4"
 ```
 
 **Success Response:**
