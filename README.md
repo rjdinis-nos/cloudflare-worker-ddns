@@ -25,8 +25,9 @@ This worker provides a compatible endpoint for DDNS clients (such as routers or 
    - Accepts query parameters for the hostname and new IP address
    - Validates all required parameters
    - Finds the Cloudflare zone (domain)
-   - Locates the specific DNS record
+   - Locates the specific DNS A record
    - Updates the record with the new IP address
+   - **Note**: Updates preserve the record's proxy status (orange cloud enabled by default)
 
 3. **Response**: Returns `good` on success (standard DDNS protocol response)
 
@@ -52,6 +53,12 @@ curl -u "example.com:your-api-token" \
   "https://your-worker.workers.dev/update?hostname=home.example.com&myip=1.2.3.4"
 ```
 
+**For root domain (@ record):**
+```bash
+curl -u "example.com:your-api-token" \
+  "https://your-worker.workers.dev/update?hostname=example.com&ip=1.2.3.4"
+```
+
 **Using verbose mode to see full response:**
 ```bash
 curl -v -u "example.com:your-api-token" \
@@ -75,6 +82,8 @@ Before you begin, ensure you have:
 - Node.js 16+ and npm installed
 - A Cloudflare account with a domain/zone configured
 - A DNS A record already created in Cloudflare (the worker updates existing records, it doesn't create new ones)
+  - For root domain: Create an A record with name `@` or your domain name
+  - For subdomains: Create an A record with the subdomain name (e.g., `home` for `home.example.com`)
 - Basic understanding of HTTP and command-line tools
 
 ## Installation
@@ -216,7 +225,9 @@ The worker returns appropriate HTTP status codes and descriptive error messages:
 - `"You must specify a hostname"` - Missing `hostname` parameter
 - `"You must specify an ip address"` - Missing both `ip` and `myip` parameters
 - `"Zone 'example.com' not found"` - Domain not found in your Cloudflare account
+- `"Invalid zone data returned for 'example.com'"` - Zone API returned incomplete data
 - `"DNS record 'home.example.com' not found in zone 'example.com'"` - DNS A record doesn't exist
+- `"Invalid zone object"` or `"Invalid record object"` - Internal validation failed
 - `"Cloudflare API error: [message]"` - API authentication failed or other API errors
 - `"Failed to update DNS record: [message]"` - DNS record update failed
 
@@ -257,6 +268,8 @@ This worker is compatible with most DDNS clients that support custom update URLs
 - Create the A record in Cloudflare DNS first
 - Verify the hostname exactly matches the DNS record name
 - The worker only updates existing A records, it doesn't create new ones
+- For root domain: Use `hostname=example.com` (matches the `@` record in Cloudflare)
+- For subdomains: Use the full FQDN like `hostname=home.example.com`
 
 #### "Cloudflare API error: Invalid request headers"
 - Check your API token is correct and not expired

@@ -71,7 +71,7 @@ async function informAPI(url, name, token) {
 
   const zone = await cloudflare.findZone(name);
   const record = await cloudflare.findRecord(zone, hostname);
-  const result = await cloudflare.updateRecord(record, ip);
+  const result = await cloudflare.updateRecord(zone, record, ip);
 
   // Only returns this response when no exception is thrown.
   return new Response(`good`, {
@@ -177,10 +177,17 @@ class Cloudflare {
       if (!body.result || body.result.length === 0) {
         throw new BadRequestException(`Zone '${name}' not found`);
       }
-      return body.result[0];
+      const zone = body.result[0];
+      if (!zone || !zone.id) {
+        throw new BadRequestException(`Invalid zone data returned for '${name}'`);
+      }
+      return zone;
     };
 
     this.findRecord = async (zone, name) => {
+      if (!zone || !zone.id) {
+        throw new BadRequestException('Invalid zone object');
+      }
       var response = await fetch(
         `https://api.cloudflare.com/client/v4/zones/${zone.id}/dns_records?name=${name}&type=A`,
         {
@@ -200,17 +207,24 @@ class Cloudflare {
       return body.result[0];
     };
 
-    this.updateRecord = async (record, value) => {
-      record.content = value;
+    this.updateRecord = async (zone, record, value) => {
+      if (!zone || !zone.id) {
+        throw new BadRequestException('Invalid zone object for update');
+      }
+      if (!record || !record.id) {
+        throw new BadRequestException('Invalid record object for update');
+      }
 
       const new_record = {
         type: record.type,
         name: record.name,
         content: value,
+        proxiable: true,
+        proxied: true,
       };
 
       var response = await fetch(
-        `https://api.cloudflare.com/client/v4/zones/${record.zone_id}/dns_records/${record.id}`,
+        `https://api.cloudflare.com/client/v4/zones/${zone.id}/dns_records/${record.id}`,
         {
           method: "PUT",
           headers: {
