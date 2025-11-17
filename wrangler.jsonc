@@ -6,7 +6,7 @@
 	"$schema": "node_modules/wrangler/config-schema.json",
 	"name": "cloudflare-worker-ddns",
 	"main": "src/index.js",
-	"compatibility_date": "2025-11-15",
+	"compatibility_date": "2025-09-06",
 	"workers_dev": true,
 	"preview_urls": true,
 	"observability": {

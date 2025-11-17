@@ -67,9 +67,10 @@ describe('Cloudflare DDNS Worker', () => {
 			const response = await worker.fetch(request, env, ctx);
 			await waitOnExecutionContext(ctx);
 			
-			// We expect it to get past auth validation
-			// (it will fail later at API stage, which is okay for this test)
-			expect(response.status).not.toBe(400);
+			// Auth validation passed, but API call fails with invalid token
+			const text = await response.text();
+			expect(text).toContain('Cloudflare API error');
+			expect(response.status).toBe(400);
 		});
 	});
 
@@ -118,8 +119,9 @@ describe('Cloudflare DDNS Worker', () => {
 			const response = await worker.fetch(request, env, ctx);
 			await waitOnExecutionContext(ctx);
 			
-			// Will fail at API call, but parameter validation passes
-			expect(response.status).not.toBe(400);
+			// Parameter validation passes, fails at API with invalid token
+			const text = await response.text();
+			expect(text).toContain('Cloudflare API error');
 		});
 
 		it('accepts myip parameter', async () => {
@@ -134,8 +136,9 @@ describe('Cloudflare DDNS Worker', () => {
 			const response = await worker.fetch(request, env, ctx);
 			await waitOnExecutionContext(ctx);
 			
-			// Will fail at API call, but parameter validation passes
-			expect(response.status).not.toBe(400);
+			// Parameter validation passes, fails at API with invalid token
+			const text = await response.text();
+			expect(text).toContain('Cloudflare API error');
 		});
 
 		it('prefers ip parameter over myip when both provided', async () => {
@@ -150,8 +153,9 @@ describe('Cloudflare DDNS Worker', () => {
 			const response = await worker.fetch(request, env, ctx);
 			await waitOnExecutionContext(ctx);
 			
-			// Will fail at API call, but parameter validation passes
-			expect(response.status).not.toBe(400);
+			// Parameter validation passes, fails at API with invalid token
+			const text = await response.text();
+			expect(text).toContain('Cloudflare API error');
 		});
 	});
 

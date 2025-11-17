@@ -182,7 +182,7 @@ class Cloudflare {
 
     this.findRecord = async (zone, name) => {
       var response = await fetch(
-        `https://api.cloudflare.com/client/v4/zones/${zone.id}/dns_records?name=${name}`,
+        `https://api.cloudflare.com/client/v4/zones/${zone.id}/dns_records?name=${name}&type=A`,
         {
           headers: {
             "Content-Type": "application/json",
@@ -202,6 +202,13 @@ class Cloudflare {
 
     this.updateRecord = async (record, value) => {
       record.content = value;
+
+      const new_record = {
+        type: record.type,
+        name: record.name,
+        content: value,
+      };
+
       var response = await fetch(
         `https://api.cloudflare.com/client/v4/zones/${record.zone_id}/dns_records/${record.id}`,
         {
@@ -210,7 +217,7 @@ class Cloudflare {
             "Content-Type": "application/json",
             Authorization: `Bearer ${this.token}`,
           },
-          body: JSON.stringify(record),
+          body: JSON.stringify(new_record),
         }
       );
       var body = await response.json();
