@@ -347,6 +347,13 @@ curl -s -X PUT \
   "https://api.cloudflare.com/client/v4/zones/ZONE_ID/dns_records/RECORD_ID"
 ```
 
+### Test Unifi Dynamic DNS
+
+Use an SSH connection to run dyndns update on UXG Router
+```bash
+inadyn --foreground --once --force --loglevel debug --config /run/ddns-eth0-inadyn.conf
+```
+
 ## License
 
 This is a standard Cloudflare Worker implementation for DDNS updates.
